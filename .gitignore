@@ -15,7 +15,7 @@ node_modules/
 # Ignore Python virtual environments
 venv/
 .venv/
-.venv312/
+venv312/
 # Ignore IDE-specific files (e.g., VS Code, IntelliJ)
 .vscode/
 .idea/
