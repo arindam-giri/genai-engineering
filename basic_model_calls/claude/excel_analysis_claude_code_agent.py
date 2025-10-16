@@ -47,7 +47,7 @@ async def analyze_excels(user_query: str, excel_folder: str):
 Your task is to analyze Excel files and answer user queries about the data.
 
 Available tools:
-- Glob: Find Excel files (*.xlsx, *.xls) in the directory
+- Glob: Find Excel files (*.xlsx, *.xls, *.xlsm) in the directory
 - Read: Read file contents (you'll need to convert Excel to readable format first)
 - Grep: Search for specific patterns in converted files
 - Task: Break down complex analysis into steps
@@ -68,8 +68,10 @@ Analysis workspace: {workspace}
 User Query: {user_query}
 
 Start by finding all Excel files, then analyze them to answer the query.""",
+        allowed_tools=["Read", "Write", "Bash", "Grep", "Task", "Glob"],
+        permission_mode='acceptEdits',
         cwd=excel_folder,
-        max_turns=25  # Allow multiple tool uses for complex analysis
+        max_turns=15  # Allow multiple tool uses for complex analysis
     )
     
     # Main analysis prompt
@@ -78,7 +80,7 @@ Start by finding all Excel files, then analyze them to answer the query.""",
 "{user_query}"
 
 Follow these steps:
-1. Use Glob to find all Excel files (*.xlsx, *.xls)
+1. Use Glob to find all Excel files (*.xlsx, *.xls, *.xlsm)
 2. Create a Python script that:
    - Reads all Excel files using pandas
    - Extracts relevant data
@@ -100,6 +102,7 @@ Save your analysis to '{workspace}/analysis_report.txt' for reference."""
         options=options
     ):
         print(message)
+        print()
     
     print("\n" + "=" * 80)
     print("ANALYSIS COMPLETE")
@@ -151,86 +154,86 @@ async def main():
     test_folder = "./excel_data"
     os.makedirs(test_folder, exist_ok=True)
     
-    # Create sample Excel files using pandas
-    setup_script = f"""
-import pandas as pd
-import os
+#     # Create sample Excel files using pandas
+#     setup_script = f"""
+# import pandas as pd
+# import os
 
-folder = "{test_folder}"
+# folder = "{test_folder}"
 
-# Sample 1: Sales Data
-sales_data = {{
-    'Date': ['2025-01-01', '2025-01-02', '2025-01-03', '2025-01-04', '2025-01-05'],
-    'Product': ['Laptop', 'Mouse', 'Keyboard', 'Monitor', 'Laptop'],
-    'Quantity': [2, 15, 8, 3, 1],
-    'Price': [1200, 25, 75, 300, 1200],
-    'Total': [2400, 375, 600, 900, 1200]
-}}
-df_sales = pd.DataFrame(sales_data)
-df_sales.to_excel(os.path.join(folder, 'sales_2025.xlsx'), index=False)
+# # Sample 1: Sales Data
+# sales_data = {{
+#     'Date': ['2025-01-01', '2025-01-02', '2025-01-03', '2025-01-04', '2025-01-05'],
+#     'Product': ['Laptop', 'Mouse', 'Keyboard', 'Monitor', 'Laptop'],
+#     'Quantity': [2, 15, 8, 3, 1],
+#     'Price': [1200, 25, 75, 300, 1200],
+#     'Total': [2400, 375, 600, 900, 1200]
+# }}
+# df_sales = pd.DataFrame(sales_data)
+# df_sales.to_excel(os.path.join(folder, 'sales_2025.xlsx'), index=False)
 
-# Sample 2: Employee Data
-employee_data = {{
-    'Employee_ID': [101, 102, 103, 104, 105],
-    'Name': ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Williams', 'Charlie Brown'],
-    'Department': ['Sales', 'IT', 'Sales', 'HR', 'IT'],
-    'Salary': [60000, 75000, 55000, 65000, 80000],
-    'Years_Experience': [3, 5, 2, 4, 7]
-}}
-df_employees = pd.DataFrame(employee_data)
-df_employees.to_excel(os.path.join(folder, 'employees.xlsx'), index=False)
+# # Sample 2: Employee Data
+# employee_data = {{
+#     'Employee_ID': [101, 102, 103, 104, 105],
+#     'Name': ['John Doe', 'Jane Smith', 'Bob Johnson', 'Alice Williams', 'Charlie Brown'],
+#     'Department': ['Sales', 'IT', 'Sales', 'HR', 'IT'],
+#     'Salary': [60000, 75000, 55000, 65000, 80000],
+#     'Years_Experience': [3, 5, 2, 4, 7]
+# }}
+# df_employees = pd.DataFrame(employee_data)
+# df_employees.to_excel(os.path.join(folder, 'employees.xlsx'), index=False)
 
-# Sample 3: Inventory Data
-inventory_data = {{
-    'SKU': ['LP001', 'MS001', 'KB001', 'MN001', 'HD001'],
-    'Item': ['Laptop', 'Mouse', 'Keyboard', 'Monitor', 'Hard Drive'],
-    'Stock': [45, 150, 89, 34, 120],
-    'Reorder_Level': [20, 50, 30, 15, 40],
-    'Supplier': ['TechCorp', 'AccessoriesInc', 'AccessoriesInc', 'DisplayTech', 'StoragePro']
-}}
-df_inventory = pd.DataFrame(inventory_data)
-df_inventory.to_excel(os.path.join(folder, 'inventory.xlsx'), index=False)
+# # Sample 3: Inventory Data
+# inventory_data = {{
+#     'SKU': ['LP001', 'MS001', 'KB001', 'MN001', 'HD001'],
+#     'Item': ['Laptop', 'Mouse', 'Keyboard', 'Monitor', 'Hard Drive'],
+#     'Stock': [45, 150, 89, 34, 120],
+#     'Reorder_Level': [20, 50, 30, 15, 40],
+#     'Supplier': ['TechCorp', 'AccessoriesInc', 'AccessoriesInc', 'DisplayTech', 'StoragePro']
+# }}
+# df_inventory = pd.DataFrame(inventory_data)
+# df_inventory.to_excel(os.path.join(folder, 'inventory.xlsx'), index=False)
 
-print("Sample Excel files created successfully!")
-"""
+# print("Sample Excel files created successfully!")
+# """
     
-    # Write and execute setup script
-    with open(f"{test_folder}/setup_samples.py", "w") as f:
-        f.write(setup_script)
+#     # Write and execute setup script
+#     with open(f"{test_folder}/setup_samples.py", "w") as f:
+#         f.write(setup_script)
     
-    try:
-        import subprocess
-        result = subprocess.run(
-            ["python", f"{test_folder}/setup_samples.py"],
-            capture_output=True,
-            text=True,
-            timeout=10
-        )
-        print(result.stdout)
-        if result.returncode != 0:
-            print(f"Warning: {result.stderr}")
-    except Exception as e:
-        print(f"Note: Could not create sample files automatically: {e}")
-        print("You can create your own Excel files in the folder.")
+#     try:
+#         import subprocess
+#         result = subprocess.run(
+#             ["python", f"{test_folder}/setup_samples.py"],
+#             capture_output=True,
+#             text=True,
+#             timeout=10
+#         )
+#         print(result.stdout)
+#         if result.returncode != 0:
+#             print(f"Warning: {result.stderr}")
+#     except Exception as e:
+#         print(f"Note: Could not create sample files automatically: {e}")
+#         print("You can create your own Excel files in the folder.")
     
-    print("\n" + "=" * 80)
-    print("EXAMPLE QUERIES")
-    print("=" * 80)
+    # print("\n" + "=" * 80)
+    # print("EXAMPLE QUERIES")
+    # print("=" * 80)
     
-    # Example queries to demonstrate
-    example_queries = [
-        "What is the total sales revenue across all products?",
-        "How many employees work in each department?",
-        "Which items in inventory are below their reorder level?",
-        "What is the average salary by department?",
-        "List all products sold and their total quantities",
-        "Show me the employee with the highest salary",
-        "What is the total value of inventory (Stock * Price from sales data)?",
-    ]
+    # # Example queries to demonstrate
+    # example_queries = [
+    #     "What is the total sales revenue across all products?",
+    #     "How many employees work in each department?",
+    #     "Which items in inventory are below their reorder level?",
+    #     "What is the average salary by department?",
+    #     "List all products sold and their total quantities",
+    #     "Show me the employee with the highest salary",
+    #     "What is the total value of inventory (Stock * Price from sales data)?",
+    # ]
     
-    print("\nExample queries you can ask:")
-    for i, q in enumerate(example_queries, 1):
-        print(f"{i}. {q}")
+    # print("\nExample queries you can ask:")
+    # for i, q in enumerate(example_queries, 1):
+    #     print(f"{i}. {q}")
     
     print("\n" + "=" * 80)
     print("Choose mode:")
