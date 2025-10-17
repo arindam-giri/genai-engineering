@@ -29,7 +29,7 @@ async def main():
     # boto3.setup_default_session(profile_name="arindam_linux")
         #     
     options = ClaudeAgentOptions(
-        system_prompt="You are an helpfull AI assistant"
+        system_prompt="You are an helpfull AI assistant\n"
     )
 
     async for message in query(
