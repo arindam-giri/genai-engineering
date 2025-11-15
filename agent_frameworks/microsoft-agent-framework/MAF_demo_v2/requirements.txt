@@ -1,0 +1,29 @@
+# Microsoft Agent Framework - ServiceNow Incident Workflow Requirements
+
+# Microsoft Agent Framework (Core)
+agent-framework>=0.1.0
+
+# Azure AI and Authentication
+azure-identity>=1.15.0
+azure-core>=1.29.0
+
+# Pydantic for structured outputs
+pydantic>=2.0.0
+
+# Optional: For production ServiceNow integration
+# requests>=2.31.0
+
+# Optional: Database (sqlite3 is built into Python)
+
+# Optional: Environment variable management
+# python-dotenv>=1.0.0
+
+# Development and Testing
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# flake8>=6.0.0
+
+# Note: This implementation uses the official Microsoft Agent Framework
+# Follow the Microsoft Agent Framework installation guide:
+# https://learn.microsoft.com/en-us/agent-framework/

@@ -1,0 +1,13 @@
+{
+  "job_id": "JOB_001",
+  "job_name": "DataSyncJob",
+  "failure_count": 12,
+  "last_failure_time": "2025-11-15 08:30:00",
+  "error_message": "Connection timeout to database",
+  "assignment_group": "Database_Team",
+  "priority": "2",
+  "category": "Database",
+  "impact": "2",
+  "urgency": "2",
+  "description": "DataSyncJob has failed 12 times with connection timeout errors"
+}
