@@ -2,7 +2,7 @@ import os
 import yaml
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
-
+from llm import call_llm
 
 def load_config(config_path="config.yaml"):
     with open(config_path, "r") as f:
@@ -34,19 +34,24 @@ def retrieve_documents(query, k=3):
     
     if not results:
         print("No matching results found.")
-        return
+        return "No matching results found."
 
     print(f"\n--- Top {len(results)} Results ---")
+    result_list = []
     for i, doc in enumerate(results, 1):
         source = doc.metadata.get('source', 'Unknown')
         page = doc.metadata.get('page', 'Unknown')
         print(f"\nResult {i} (Source: {source}, Page: {page}):")
         print(doc.page_content)
+        result_list.append(doc.page_content)
         print("-" * 50)
+    return "\n".join(result_list)
+
+base_prompt = "Analyse the user query and retrieved contents and respond."
 
 if __name__ == "__main__":
     # A simple interactive loop for retrieval
-    print("Welcome to the Document Retrieval System!")
+    print("Welcome to test retrieval")
     print("Type 'exit' or 'quit' to stop.")
     
     while True:
@@ -55,4 +60,8 @@ if __name__ == "__main__":
             break
             
         if user_query.strip():
-            retrieve_documents(user_query)
+            vector_result = retrieve_documents(user_query)
+            llm_input = base_prompt + "\n user query: " + user_query + "\n retrieved contents: " + vector_result
+            llm_response = call_llm(llm_input)
+            print(llm_response)
+            

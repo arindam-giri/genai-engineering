@@ -1,7 +1,7 @@
 import urllib.request
 import json
 
-def call_llm():
+def call_llm(query: str):
     # Default Ollama local endpoint for chat
     url = "http://localhost:11434/api/chat"
     
@@ -10,7 +10,7 @@ def call_llm():
         "messages": [
             {
                 "role": "user",
-                "content": "Explain the concept of 'zero-shot learning' in one simple sentence."
+                "content": query
             }
         ],
         # Set stream to False to get the entire response at once
@@ -37,15 +37,19 @@ def call_llm():
             result_json = json.loads(result_str)
             
             print("=== Response ===")
-            print(result_json["message"]["content"])
+            result = result_json["message"]["content"]
+            print(result)
             print("================")
+            return result
             
     except urllib.error.URLError as e:
         print(f"Error: Could not connect to Ollama ({e.reason}).")
         print("Please ensure that Ollama is running locally on port 11434.")
         print("Command to run Ollama (if not running): ollama run gemma4:26b")
+        return "unable to generate reponse"
     except Exception as e:
         print(f"An error occurred: {e}")
+        return "unable to generate reponse"
 
 if __name__ == "__main__":
     call_llm()
