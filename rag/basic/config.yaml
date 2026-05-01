@@ -1,0 +1,6 @@
+data_dir: "data"
+chroma_persist_dir: "chroma_db"
+chunk_size: 1000
+chunk_overlap: 200
+embedding_model: "embeddinggemma:300m"
+ollama_base_url: "http://localhost:11434"
