@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s:%(name)s: %(message)s')
 import os
 import yaml
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
@@ -23,10 +27,10 @@ def create_vector_db():
     # Ensure data directory exists
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
-        print(f"Created '{data_dir}' directory. Please add PDF files there before running.")
+    logger.info(f"Created '{data_dir}' directory. Please add PDF files there before running.")
         return
 
-    print(f"Scanning for PDFs in '{data_dir}'...")
+    logger.info(f"Scanning for PDFs in '{data_dir}'...")
     # Load all PDFs from the data directory
     loader = DirectoryLoader(data_dir, glob="**/*.pdf", loader_cls=PyPDFLoader)
     try:
@@ -39,9 +43,9 @@ def create_vector_db():
         print(f"No PDF documents found in '{data_dir}'. Please add some PDFs and try again.")
         return
 
-    print(f"Successfully loaded {len(documents)} document pages.")
+    logger.info(f"Successfully loaded {len(documents)} document pages.")
     
-    print("Splitting documents into chunks...")
+    logger.info("Splitting documents into chunks...")
     # Use RecursiveCharacterTextSplitter as requested
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
@@ -50,7 +54,7 @@ def create_vector_db():
     chunks = text_splitter.split_documents(documents)
     print(f"Split documents into {len(chunks)} chunks.")
 
-    print(f"Generating embeddings with local Ollama model '{embedding_model}'...")
+    logger.info(f"Generating embeddings with local Ollama model '{embedding_model}'...")
     embeddings = OllamaEmbeddings(model=embedding_model, base_url=ollama_base_url)
     
     # Create and persist the vector database
@@ -60,7 +64,8 @@ def create_vector_db():
         persist_directory=persist_directory
     )
     
-    print(f"Vector database successfully created and persisted to '{persist_directory}'.")
+    logger.info(f"Vector database successfully created and persisted to '{persist_directory}'.")
 
 if __name__ == "__main__":
+    logger.info("Running as script: create vector DB...")
     create_vector_db()

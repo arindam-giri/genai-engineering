@@ -1,8 +1,12 @@
 import os
 import yaml
+import logging
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
 from llm import call_llm
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s:%(name)s: %(message)s')
 
 def load_config(config_path="config.yaml"):
     with open(config_path, "r") as f:
@@ -16,10 +20,10 @@ def retrieve_documents(query, k=3):
     ollama_base_url = config.get("ollama_base_url", "http://localhost:11434")
     
     if not os.path.exists(persist_directory):
-        print(f"Vector database not found at '{persist_directory}'. Please run vector_creator.py first.")
+        logger.info(f"Vector database not found at '{persist_directory}'. Please run vector_creator.py first.")
         return
 
-    print(f"Loading vector database from '{persist_directory}'...")
+    logger.info(f"Loading vector database from '{persist_directory}'...")
     embeddings = OllamaEmbeddings(model=embedding_model, base_url=ollama_base_url)
     
     # Load the existing Chroma vector database
@@ -28,21 +32,21 @@ def retrieve_documents(query, k=3):
         embedding_function=embeddings
     )
     
-    print(f"\nSearching for: '{query}'")
+    logger.info(f"Searching for: '{query}'")
     # Perform similarity search
     results = vector_store.similarity_search(query, k=k)
     
     if not results:
-        print("No matching results found.")
+        logger.warning("No matching results found.")
         return "No matching results found."
 
-    print(f"\n--- Top {len(results)} Results ---")
+    logger.info(f"--- Top {len(results)} Results ---")
     result_list = []
     for i, doc in enumerate(results, 1):
         source = doc.metadata.get('source', 'Unknown')
         page = doc.metadata.get('page', 'Unknown')
-        print(f"\nResult {i} (Source: {source}, Page: {page}):")
-        print(doc.page_content)
+        logger.info(f"Result {i} (Source: {source}, Page: {page}):")
+        logger.info(doc.page_content)
         result_list.append(doc.page_content)
         print("-" * 50)
     return "\n".join(result_list)
@@ -51,8 +55,8 @@ base_prompt = "Analyse the user query and retrieved contents and respond."
 
 if __name__ == "__main__":
     # A simple interactive loop for retrieval
-    print("Welcome to test retrieval")
-    print("Type 'exit' or 'quit' to stop.")
+    logger.info("Welcome to test retrieval")
+    logger.info("Type 'exit' or 'quit' to stop.")
     
     while True:
         user_query = input("\nEnter your query: ")

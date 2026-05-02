@@ -1,5 +1,9 @@
-import urllib.request
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s:%(name)s: %(message)s')
 import json
+import urllib.request
 
 def call_llm(query: str):
     # Default Ollama local endpoint for chat
@@ -27,8 +31,8 @@ def call_llm(query: str):
         headers={'Content-Type': 'application/json'}
     )
     
-    print(f"Sending request to local Ollama (Model: {payload['model']})...")
-    print("Waiting for response...\n")
+    logger.info(f"Sending request to local Ollama (Model: {payload['model']})...")
+    logger.info("Waiting for response...\n")
     
     try:
         # Execute the request
@@ -36,19 +40,19 @@ def call_llm(query: str):
             result_str = response.read().decode('utf-8')
             result_json = json.loads(result_str)
             
-            print("=== Response ===")
+            logger.info("=== Response ===")
             result = result_json["message"]["content"]
-            print(result)
-            print("================")
+            logger.info(result)
+            logger.info("================")
             return result
             
     except urllib.error.URLError as e:
-        print(f"Error: Could not connect to Ollama ({e.reason}).")
-        print("Please ensure that Ollama is running locally on port 11434.")
-        print("Command to run Ollama (if not running): ollama run gemma4:26b")
+        logger.error(f"Error: Could not connect to Ollama ({e.reason}).")
+        logger.error("Please ensure that Ollama is running locally on port 11434.")
+        logger.error("Command to run Ollama (if not running): ollama run gemma4:26b")
         return "unable to generate reponse"
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.exception(f"An error occurred: {e}")
         return "unable to generate reponse"
 
 if __name__ == "__main__":
